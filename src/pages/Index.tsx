@@ -22,37 +22,53 @@ const Index = () => {
   ];
 
   useEffect(() => {
+    // Set audio properties
     audio.loop = true;
+    audio.preload = 'metadata'; // Optimize loading
+    audio.volume = 0.5; // Start at 50% volume
+
+    // Setup audio context for modern browsers
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaElementSource(audio);
+    source.connect(audioContext.destination);
+
     // Auto-play audio when component mounts
-    audio.play()
-      .then(() => {
+    const playAudio = async () => {
+      try {
+        // Resume audio context if suspended (required by Chrome)
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+        await audio.play();
         setIsPlaying(true);
-      })
-      .catch((error: Error) => {
+      } catch (error) {
         console.log("Auto-play failed:", error);
-        // Most browsers require user interaction before playing audio
         setIsPlaying(false);
-      });
-    
+      }
+    };
+
+    playAudio();
+
     return () => {
       audio.pause();
       setIsPlaying(false);
+      // Cleanup audio context
+      audioContext.close();
     };
   }, [audio]);
 
-  const toggleMusic = () => {
+  const toggleMusic = async () => {
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play()
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((error: Error) => {
-          console.log("Play failed:", error);
-          setIsPlaying(false);
-        });
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.log("Play failed:", error);
+        setIsPlaying(false);
+      }
     }
   };
 

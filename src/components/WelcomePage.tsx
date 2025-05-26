@@ -51,7 +51,7 @@ const WelcomePage = () => {
             </div>
             <div className="flex items-center justify-center space-x-2 text-rosewood-dark">
               <MapPin className="h-5 w-5" />
-              <span className="font-raleway">Gedung Aula Lt. 3</span>
+              <span className="font-raleway">Gedung Aula Lt. 3 Universitas Saburai</span>
             </div>
             <div className="flex items-center justify-center space-x-2 text-rosewood-dark">
               <Users className="h-5 w-5" />

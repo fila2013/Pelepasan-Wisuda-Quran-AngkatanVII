@@ -28,7 +28,7 @@ const Index = () => {
       .then(() => {
         setIsPlaying(true);
       })
-      .catch(error => {
+      .catch((error: Error) => {
         console.log("Auto-play failed:", error);
         // Most browsers require user interaction before playing audio
         setIsPlaying(false);
@@ -49,7 +49,7 @@ const Index = () => {
         .then(() => {
           setIsPlaying(true);
         })
-        .catch(error => {
+        .catch((error: Error) => {
           console.log("Play failed:", error);
           setIsPlaying(false);
         });

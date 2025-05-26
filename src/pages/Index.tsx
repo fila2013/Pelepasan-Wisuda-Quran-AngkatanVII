@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, Play, Pause, MapPin, Calendar, Clock, Users, Star, Heart, Image } from 'lucide-react';
@@ -11,7 +11,9 @@ import GalleryPage from '@/components/GalleryPage';
 const Index = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audio] = useState(new Audio('/music/saat-kau-telah-mengerti.mp3')); // Background music file
+  const [audio] = useState(new Audio('/music/saat-kau-telah-mengerti.mp3'));
+  const audioContextRef = useRef(null);
+  const sourceRef = useRef(null);
 
   const pages = [
     { component: WelcomePage, title: 'Undangan' },
@@ -21,56 +23,53 @@ const Index = () => {
     { component: GalleryPage, title: 'Galeri' }
   ];
 
-  useEffect(() => {
-    // Set audio properties
-    audio.loop = true;
-    audio.preload = 'metadata'; // Optimize loading
-    audio.volume = 0.5; // Start at 50% volume
-
-    // Setup audio context for modern browsers
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaElementSource(audio);
-    source.connect(audioContext.destination);
-
-    // Auto-play audio when component mounts
-    const playAudio = async () => {
-      try {
-        // Resume audio context if suspended (required by Chrome)
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
-        await audio.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.log("Auto-play failed:", error);
-        setIsPlaying(false);
+  const initializeAudio = async () => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
+        sourceRef.current.connect(audioContextRef.current.destination);
       }
-    };
 
-    playAudio();
-
-    return () => {
-      audio.pause();
-      setIsPlaying(false);
-      // Cleanup audio context
-      audioContext.close();
-    };
-  }, [audio]);
-
-  const toggleMusic = async () => {
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.log("Play failed:", error);
-        setIsPlaying(false);
-      }
+      audio.loop = true;
+      audio.volume = 0.5;
+    } catch (error) {
+      console.error("Failed to initialize audio:", error);
     }
   };
+
+  const toggleMusic = async () => {
+    try {
+      if (!audioContextRef.current) {
+        await initializeAudio();
+      }
+
+      if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Play failed:", error);
+      setIsPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      audio.pause();
+      setIsPlaying(false);
+    };
+  }, []);
 
   const nextPage = () => {
     if (currentPage < pages.length - 1) {

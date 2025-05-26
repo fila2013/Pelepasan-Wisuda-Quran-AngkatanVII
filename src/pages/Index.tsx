@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, Play, Pause, MapPin, Calendar, Clock, Users, Star, Heart, Image } from 'lucide-react';
@@ -12,8 +12,36 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio] = useState(new Audio('/music/saat-kau-telah-mengerti.mp3'));
-  const audioContextRef = useRef(null);
-  const sourceRef = useRef(null);
+
+  useEffect(() => {
+    // Set audio properties
+    audio.loop = true;
+    audio.volume = 0.5;
+
+    // Cleanup on unmount
+    return () => {
+      audio.pause();
+      setIsPlaying(false);
+    };
+  }, []);
+
+  const toggleMusic = async () => {
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+          setIsPlaying(true);
+        }
+      }
+    } catch (error) {
+      console.error("Play failed:", error);
+      setIsPlaying(false);
+    }
+  };
 
   const pages = [
     { component: WelcomePage, title: 'Undangan' },

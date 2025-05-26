@@ -28,7 +28,7 @@ const InvitationPage = () => {
 
             <p className="font-crimson text-lg text-rosewood-dark leading-relaxed">
               Dengan memanjatkan puji syukur kehadirat Allah SWT. Kami segenap keluarga besar 
-              <strong> SDIT Fitrah Insani Langkapura</strong>, akan menyelenggarakan Wisuda Al-Qur'an Angkatan VI 
+              <strong> SDIT Fitrah Insani Langkapura</strong>, akan menyelenggarakan Wisuda Al-Qur'an Angkatan VII 
               dan mengundang orang tua siswa/i untuk hadir pada:
             </p>
 
